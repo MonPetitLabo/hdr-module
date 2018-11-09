@@ -6,7 +6,7 @@ def parseBluetoothInput( content ) :
     print content
     return content
 
-def main() 
+def main() :
     while True:
         rcv = btSerial.read(512)
         rcv = parseBluetoothInput(rcv)

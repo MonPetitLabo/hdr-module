@@ -1,0 +1,6 @@
+- name: Ensure that application/utilities are presents on server
+  yum:
+    - name: {{ item }}
+  with_items:
+    - python
+    - git

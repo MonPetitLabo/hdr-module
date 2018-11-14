@@ -1,0 +1,6 @@
+- name: Ensure pyserial is installed on environment
+  git: 
+    name: https://github.com/pyserial/pyserial
+    dest: /opt/pyserial
+    checkout: yes
+    recursive: yes

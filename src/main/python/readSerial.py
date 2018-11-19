@@ -4,6 +4,7 @@ import serial
 import os.path
 import time
 import gphoto2 as gp
+#import gphoto2cffi as gp
 import sdnotify
 from fractions import Fraction
 
@@ -32,10 +33,15 @@ def parseBluetoothInput( content ) :
         lastCmd = cmds[-2]
     return lastCmd
 
-def shoot () : 
-    print "Take a picture..."
-    camera = gp.check_result(gp.gp_camera_new()) 
-    gp.gp_camera_capture(camera, gp.GP_CAPTURE_IMAGE) 
+def shoot ( btSerial ) : 
+    sendMessage(btSerial, "Take a picture...")
+    camera = gp.check_result(gp.gp_camera_new())
+    gp.check_result(gp.gp_camera_init(camera))
+    sendMessage(btSerial, 'Capturing image')
+    file_path = gp.check_result(gp.gp_camera_capture(camera, gp.GP_CAPTURE_IMAGE))
+    sendMessage(btSerial, 'Camera file path: {0}/{1}'.format(file_path.folder, file_path.name))
+    time.sleep( 3 ) 
+    gp.check_result(gp.gp_camera_exit(camera))
     return
 
 def readEV ( content ) :
@@ -56,7 +62,7 @@ def dispatch ( btSerial, command ) :
         value = readEV( command ) 
         sendMessage ( btSerial, "*A" + str(value) + "*A" )
     elif (command.startswith('SHOOT') ) :
-        shoot() 
+        shoot( btSerial ) 
     else : 
         return 
 

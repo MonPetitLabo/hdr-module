@@ -6,7 +6,7 @@ import gphoto2 as gp
 # --- Constants
 # -----------
 CAPTURE_TARGET = 'capturetarget'
-SHUTTER_SPEEP = 'shutterspeed'
+SHUTTER_SPEED = 'shutterspeed'
 ISO = 'iso'
 APERTURE = 'aperture'
 
@@ -14,7 +14,7 @@ cameraConfiguration = {}
 
 def initCameraConfiguration(camera) :
     getAllChoiceFromParameter(camera, CAPTURE_TARGET)
-    getAllChoiceFromParameter(camera, SHUTTER_SPEEP)
+    getAllChoiceFromParameter(camera, SHUTTER_SPEED)
     getAllChoiceFromParameter(camera, ISO)
     getAllChoiceFromParameter(camera, APERTURE)
     
@@ -72,13 +72,22 @@ def getValueOfSelectedParameter(camera, parameter) :
 def getIndexOfSelectedParameter(camera, parameter) : 
     return cameraConfiguration[parameter][getValueOfSelectedParameter(camera, parameter)]
 
-def takePhoto(camera, speed = -1 ):
+def takePhoto(camera, speed = -1, aperture = -1, iso = -1 ):
     if ( speed < 0 ) :
-        speed = getIndexOfSelectedParameter(camera, SHUTTER_SPEEP)
+        speed = getIndexOfSelectedParameter(camera, SHUTTER_SPEED)
+    if ( aperture < 0 ) :
+        aperture = getIndexOfSelectedParameter(camera, APERTURE)
+    if ( iso < 0 ) : 
+        iso = getIndexOfSelectedParameter(camera, ISO)
 
-    updateConfiguration(camera, speed)
+    updateConfiguration(camera, speed, aperture, iso)
+
+    gp.gp_camera_trigger_capture(camera)
+
     return 
 
-def updateConfiguration(camera, speed):
-    setPropertyTo(camera, SHUTTER_SPEEP, speed)
+def updateConfiguration(camera, speed, aperture, iso):
+    setPropertyTo(camera, SHUTTER_SPEED, speed)
+    setPropertyTo(camera, APERTURE, aperture)
+    setPropertyTo(camera, ISO, iso)
     return

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import gphoto2 as gp
+import time
 
 # ------------
 # --- Constants
@@ -11,6 +12,7 @@ ISO = 'iso'
 APERTURE = 'aperture'
 
 cameraConfiguration = {} 
+cameraTechnicalConfiguration = {}
 
 def initCameraConfiguration(camera) :
     getAllChoiceFromParameter(camera, CAPTURE_TARGET)
@@ -52,7 +54,11 @@ def getAllChoiceFromParameter(camera, parameter):
         if not (cameraConfiguration.has_key(parameter)) :
             cameraConfiguration[parameter] = {} 
         
+        if not (cameraTechnicalConfiguration.has_key(parameter)) :
+            cameraTechnicalConfiguration[parameter] = {} 
+
         cameraConfiguration[parameter][choice] = n 
+        cameraTechnicalConfiguration[parameter][n] = choice
     return 
     
 
@@ -82,12 +88,39 @@ def takePhoto(camera, speed = -1, aperture = -1, iso = -1 ):
 
     updateConfiguration(camera, speed, aperture, iso)
 
-    gp.gp_camera_trigger_capture(camera)
+#    gp.gp_camera_trigger_capture(camera)
+    camera.capture(gp.GP_CAPTURE_IMAGE)
 
     return 
+
+def takePhotoHdr(camera, nbPicture, evRequire) :
+    speed = getIndexOfSelectedParameter(camera, SHUTTER_SPEED)
+    sequence = buildSpeedSequence(speed, nbPicture, evRequire)
+    for speedIndex in sequence : 
+        takePhoto(camera, speedIndex)
+        time.sleep(0.03)
+
+    # reset default configuration 
+    setPropertyTo(camera, SHUTTER_SPEED, speed)
 
 def updateConfiguration(camera, speed, aperture, iso):
     setPropertyTo(camera, SHUTTER_SPEED, speed)
     setPropertyTo(camera, APERTURE, aperture)
     setPropertyTo(camera, ISO, iso)
     return
+
+
+def buildSpeedSequence(baseSpeedIndex, nbPicture, evRequire): 
+    sequence = [baseSpeedIndex] 
+    for i in range(0, (nbPicture - 1) / 2) :
+        minusSpeedIndex = baseSpeedIndex - evRequire*(i+1)
+        if (cameraTechnicalConfiguration[SHUTTER_SPEED].has_key(minusSpeedIndex)) :
+            sequence.append(minusSpeedIndex)
+
+        maxSpeed = baseSpeedIndex + evRequire*(i+1)
+        if (cameraTechnicalConfiguration[SHUTTER_SPEED].has_key(maxSpeed)) : 
+            sequence.append(maxSpeed)
+
+
+    return sequence
+

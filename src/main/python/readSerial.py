@@ -20,6 +20,11 @@ componentDictionnary = {
         'SP' : 'SPEED',
 }
 
+photoParameter = {
+    'NB' : 1,
+    'EV' : 1,
+}
+
 COMMAND_SEPARATOR = '#'
 
 BT_FILE="/dev/rfcomm0"
@@ -42,14 +47,26 @@ def shoot ( btSerial ) :
     
     sendMessage(btSerial, 'Capturing image')
     
-    functions.takePhoto(camera)
+    if (photoParameter['NB'] == 1) {
+        functions.takePhoto(camera)
+    } else {
+        functions.takePhotoHdr(camera, photoParameter['NB'], photoParameter['EV'])
+    }
     
     functions.releaseCamera(camera)
     return
 
 def readEV ( content ) :
-    value = Fraction(int(content.split('EV')[-1]), 3) 
-    print "EV : " + str(value)
+    logicalValue = int(content.split('EV')[-1])
+    realvalue = Fraction(logicalValue, 3) 
+    print "EV : " + str(realvalue)
+    photoParameter['EV'] = logicalValue
+    return realvalue
+
+def readNbPictureToTake ( content ) :
+    value = (int(content.split('NB')) * 2) + 1
+    print "NB : " + str(value)
+    photoParameter['NB'] = value
     return value
 
 def sendMessage ( btSerial, content ) : 
@@ -64,6 +81,9 @@ def dispatch ( btSerial, command ) :
     if( command.startswith('EV') ) :
         value = readEV( command ) 
         sendMessage ( btSerial, "*A" + str(value) + "*A" )
+    elif (command.startswith('NB') ) :
+        value = readEV( command ) 
+        sendMessage ( btSerial, "*N" + str(value) + "*N" )
     elif (command.startswith('SHOOT') ) :
         shoot( btSerial ) 
     else : 

@@ -37,16 +37,16 @@ def parseBluetoothInput( content ) :
 
 def shoot ( btSerial ) : 
     sendMessage(btSerial, "Take a picture...")
-    camera = getCamera()
-    initCameraConfiguration(camera)
+    camera = functions.getCamera()
+    functions.initCameraConfiguration(camera)
     
     sendMessage(btSerial, 'Capturing image')
     
-    takePhoto(camera)
+    functions.takePhoto(camera)
 
     sendMessage(btSerial, 'Camera file path: {0}/{1}'.format(file_path.folder, file_path.name))
     
-    releaseCamera(camera)
+    functions.releaseCamera(camera)
     return
 
 def readEV ( content ) :

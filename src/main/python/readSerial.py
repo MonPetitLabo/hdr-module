@@ -6,7 +6,9 @@ import time
 import gphoto2 as gp
 #import gphoto2cffi as gp
 import sdnotify
+import functions
 from fractions import Fraction
+
 
 #btSerial = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=0.5)
 
@@ -35,13 +37,16 @@ def parseBluetoothInput( content ) :
 
 def shoot ( btSerial ) : 
     sendMessage(btSerial, "Take a picture...")
-    camera = gp.check_result(gp.gp_camera_new())
-    gp.check_result(gp.gp_camera_init(camera))
+    camera = getCamera()
+    initCameraConfiguration(camera)
+    
     sendMessage(btSerial, 'Capturing image')
-    file_path = gp.check_result(gp.gp_camera_capture(camera, gp.GP_CAPTURE_IMAGE))
+    
+    takePhoto(camera)
+
     sendMessage(btSerial, 'Camera file path: {0}/{1}'.format(file_path.folder, file_path.name))
-    time.sleep( 3 ) 
-    gp.check_result(gp.gp_camera_exit(camera))
+    
+    releaseCamera(camera)
     return
 
 def readEV ( content ) :

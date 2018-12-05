@@ -47,11 +47,10 @@ def shoot ( btSerial ) :
     
     sendMessage(btSerial, 'Capturing image')
     
-    if (photoParameter['NB'] == 1) {
+    if (photoParameter['NB'] == 1) :
         functions.takePhoto(camera)
-    } else {
+    else :
         functions.takePhotoHdr(camera, photoParameter['NB'], photoParameter['EV'])
-    }
     
     functions.releaseCamera(camera)
     return
@@ -64,7 +63,7 @@ def readEV ( content ) :
     return realvalue
 
 def readNbPictureToTake ( content ) :
-    value = (int(content.split('NB')) * 2) + 1
+    value = (int(content.split('NB')[-1]) * 2) + 1
     print "NB : " + str(value)
     photoParameter['NB'] = value
     return value
@@ -79,15 +78,17 @@ def readFile () :
 
 def dispatch ( btSerial, command ) :
     if( command.startswith('EV') ) :
-        value = readEV( command ) 
-        sendMessage ( btSerial, "*A" + str(value) + "*A" )
+        readEV( command ) 
     elif (command.startswith('NB') ) :
-        value = readEV( command ) 
-        sendMessage ( btSerial, "*N" + str(value) + "*N" )
+        readNbPictureToTake( command ) 
     elif (command.startswith('SHOOT') ) :
         shoot( btSerial ) 
     else : 
         return 
+
+def refreshSettings ( btSerial ) :
+    settingsMessage = "*A%S*A*N%S*N" (photoParameter['EV'], photoParameter['NB'])
+    sendMessage( btSerial, settingsMessage )    
 
 def action ( btSerial ) : 
     rcv = btSerial.read(512)
@@ -95,6 +96,7 @@ def action ( btSerial ) :
         cmd = parseBluetoothInput(rcv) 
         print "Last command:" + cmd
         dispatch ( btSerial, cmd )
+        refreshSettings ( btSerial )
     return
 
 def main() :

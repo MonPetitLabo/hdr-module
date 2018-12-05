@@ -43,8 +43,6 @@ def shoot ( btSerial ) :
     sendMessage(btSerial, 'Capturing image')
     
     functions.takePhoto(camera)
-
-    sendMessage(btSerial, 'Camera file path: {0}/{1}'.format(file_path.folder, file_path.name))
     
     functions.releaseCamera(camera)
     return

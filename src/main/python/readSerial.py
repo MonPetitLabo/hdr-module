@@ -68,6 +68,16 @@ def readNbPictureToTake ( content ) :
     photoParameter['NB'] = value
     return value
 
+def getReadableSettings ( ) :
+    camera = functions.getCamera()
+    message = "D:" + functions.getValueOfSelectedParameter(camera, functions.CAPTURE_TARGET) + "\n"
+    message = message + "S:" + functions.getValueOfSelectedParameter(camera, functions.SHUTTER_SPEED) + "\n"
+    message = message + "A:" + functions.getValueOfSelectedParameter(camera, functions.APERTURE) + "\n"
+    message = message + "ISO:" + functions.getValueOfSelectedParameter(camera, functions.ISO) + "\n"
+    
+    functions.releaseCamera(camera)
+    return message
+
 def sendMessage ( btSerial, content ) : 
     btSerial.write( content ) 
     return
@@ -87,7 +97,7 @@ def dispatch ( btSerial, command ) :
         return 
 
 def refreshSettings ( btSerial ) :
-    settingsMessage = "*A%s*N%s*" % (Fraction(photoParameter['EV'], 3), photoParameter['NB'])
+    settingsMessage = "*A%s*N%s*P%s*" % (Fraction(photoParameter['EV'], 3), photoParameter['NB'], getReadableSettings())
     sendMessage( btSerial, settingsMessage )    
 
 def action ( btSerial ) : 
@@ -96,7 +106,7 @@ def action ( btSerial ) :
         cmd = parseBluetoothInput(rcv) 
         print "Last command:" + cmd
         dispatch ( btSerial, cmd )
-        refreshSettings ( btSerial )
+    refreshSettings ( btSerial )
     return
 
 def main() :

@@ -45,14 +45,13 @@ def shoot ( btSerial ) :
     camera = functions.getCamera()
     functions.initCameraConfiguration(camera)
     
-    sendMessage(btSerial, 'Capturing image')
-    
     if (photoParameter['NB'] == 1) :
         functions.takePhoto(camera)
     else :
         functions.takePhotoHdr(camera, photoParameter['NB'], photoParameter['EV'])
     
     functions.releaseCamera(camera)
+    sendMessage(btSerial, "Done ! ") 
     return
 
 def readEV ( content ) :
@@ -86,6 +85,18 @@ def readFile () :
     etcPasswd = open("/etc/passwd", "r")
     print etcPasswd.read() 
 
+def updateSpeed( command ) :
+    value = command.split('SP') 
+    camera = functions.getCamera()
+    functions.initCameraConfiguration(camera) 
+
+#    if (functions.cameraTechnicalConfiguration[functions.SHUTTER_SPEED].has_key(value)) :
+#        index = functions.cameraTechnicalConfiguration[functions.SHUTTER_SPEED][value]
+#        functions.setPropertyTo(camera, SHUTTER_SPEED, index)
+    
+    functions.releaseCamera(camera)
+        
+
 def dispatch ( btSerial, command ) :
     if( command.startswith('EV') ) :
         readEV( command ) 
@@ -93,6 +104,8 @@ def dispatch ( btSerial, command ) :
         readNbPictureToTake( command ) 
     elif (command.startswith('SHOOT') ) :
         shoot( btSerial ) 
+    elif (command.startswith('SP') ) :
+        updateSpeed( command )
     else : 
         return 
 

@@ -87,7 +87,7 @@ def dispatch ( btSerial, command ) :
         return 
 
 def refreshSettings ( btSerial ) :
-    settingsMessage = "*A%s*A*N%s*N" % (photoParameter['EV'], photoParameter['NB'])
+    settingsMessage = "*A%s*N%s*" % (Fraction(photoParameter['EV'], 3), photoParameter['NB'])
     sendMessage( btSerial, settingsMessage )    
 
 def action ( btSerial ) : 

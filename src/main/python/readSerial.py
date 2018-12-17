@@ -7,6 +7,7 @@ import gphoto2 as gp
 #import gphoto2cffi as gp
 import sdnotify
 import functions
+import subprocess
 from fractions import Fraction
 
 
@@ -97,6 +98,12 @@ def updateSpeed( command ) :
     functions.releaseCamera(camera)
         
 
+def poweroff() :
+    cmdCommand = "sudo poweroff"
+    process = subprocess.Popen(cmdCommand.split(), stdout=subprocess.PIPE)
+    return
+
+
 def dispatch ( btSerial, command ) :
     if( command.startswith('EV') ) :
         readEV( command ) 
@@ -106,6 +113,8 @@ def dispatch ( btSerial, command ) :
         shoot( btSerial ) 
     elif (command.startswith('SP') ) :
         updateSpeed( command )
+    elif (command.startswith('PWR')):
+        poweroff()
     else : 
         return 
 

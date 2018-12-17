@@ -22,7 +22,7 @@ componentDictionnary = {
 }
 
 photoParameter = {
-    'NB' : 1,
+    'NB' : 0,
     'EV' : 1,
 }
 
@@ -86,17 +86,40 @@ def readFile () :
     etcPasswd = open("/etc/passwd", "r")
     print etcPasswd.read() 
 
-def updateSpeed( command ) :
-    value = command.split('SP') 
+def updateSpeed( btSerial, command ) :
+    value = command.split('SP')[-1]
     camera = functions.getCamera()
     functions.initCameraConfiguration(camera) 
-
-#    if (functions.cameraTechnicalConfiguration[functions.SHUTTER_SPEED].has_key(value)) :
-#        index = functions.cameraTechnicalConfiguration[functions.SHUTTER_SPEED][value]
-#        functions.setPropertyTo(camera, SHUTTER_SPEED, index)
+    if (functions.cameraConfiguration[functions.SHUTTER_SPEED].has_key(value)) :
+        index = functions.cameraConfiguration[functions.SHUTTER_SPEED][value]
+        functions.setPropertyTo(camera, functions.SHUTTER_SPEED, index)
+    else :
+        sendMessage(btSerial, "Unexpected value for speed : " + value + "\n")
     
     functions.releaseCamera(camera)
-        
+    return
+
+def updateAperture(btSerial, command) : 
+    value = command.split('AP')[-1]
+    camera = functions.getCamera()
+    functions.initCameraConfiguration(camera)
+    if(functions.cameraConfiguration[functions.APERTURE].has_key(value)) : 
+        index = functions.cameraConfiguration[functions.APERTURE][value]
+        functions.setPropertyTo(camera, functions.APERTURE, index)
+    else : 
+        sendMessage(btSerial, "Unexpected value for aperture : " + value + "\n")
+    return
+
+def updateIso(btSerial, command):
+    value = command.split('ISO')[-1]
+    camera = functions.getCamera()
+    functions.initCameraConfiguration(camera)
+    if(functions.cameraConfiguration[functions.ISO].has_key(value)) : 
+        index = functions.cameraConfiguration[functions.ISO][value]
+        functions.setPropertyTo(camera, functions.ISO, index)
+    else : 
+        sendMessage(btSerial, "Unexpected value for ISO : " + value + "\n")
+    return
 
 def poweroff() :
     cmdCommand = "sudo poweroff"
@@ -112,9 +135,15 @@ def dispatch ( btSerial, command ) :
     elif (command.startswith('SHOOT') ) :
         shoot( btSerial ) 
     elif (command.startswith('SP') ) :
-        updateSpeed( command )
+        updateSpeed( btSerial, command )
+    elif (command.startswith('AP') ) :
+        updateAperture( btSerial, command )
+    elif (command.startswith('ISO') ) :
+        updateIso( btSerial, command )
     elif (command.startswith('PWR')):
         poweroff()
+    elif (command.startswith('READSETTINGS')) :
+        refreshSettings(btSerial)
     else : 
         return 
 
@@ -128,7 +157,7 @@ def action ( btSerial ) :
         cmd = parseBluetoothInput(rcv) 
         print "Last command:" + cmd
         dispatch ( btSerial, cmd )
-    refreshSettings ( btSerial )
+        refreshSettings ( btSerial )
     return
 
 def main() :

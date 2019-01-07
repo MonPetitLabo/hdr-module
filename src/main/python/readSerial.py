@@ -19,11 +19,13 @@ componentDictionnary = {
         'SHOOT':'SHOOT',
         'EV' : 'BRACKET_SIZE',
         'SP' : 'SPEED',
+        'BSP': 'SPEED_BULB',
 }
 
 photoParameter = {
     'NB' : 0,
     'EV' : 1,
+    'BSP' : -1,
 }
 
 COMMAND_SEPARATOR = '#'
@@ -46,7 +48,9 @@ def shoot ( btSerial ) :
     camera = functions.getCamera()
     functions.initCameraConfiguration(camera)
     
-    if (photoParameter['NB'] == 1) :
+    if (photoParameter['BSP'] > -1) : 
+        functions.takeLongPhoto(camera) 
+    elif (photoParameter['NB'] == 1) :
         functions.takePhoto(camera)
     else :
         functions.takePhotoHdr(camera, photoParameter['NB'], photoParameter['EV'])
@@ -71,7 +75,10 @@ def readNbPictureToTake ( content ) :
 def getReadableSettings ( ) :
     camera = functions.getCamera()
     message = "D:" + functions.getValueOfSelectedParameter(camera, functions.CAPTURE_TARGET) + "\n"
-    message = message + "S:" + functions.getValueOfSelectedParameter(camera, functions.SHUTTER_SPEED) + "\n"
+    message = message + "S:" + functions.getValueOfSelectedParameter(camera, functions.SHUTTER_SPEED)
+    if ( photoParameter['BSP'] > -1 ) :
+        message = message + "("+ photoParameter['BSP']  + ")"
+    message = message + "\n"
     message = message + "A:" + functions.getValueOfSelectedParameter(camera, functions.APERTURE) + "\n"
     message = message + "ISO:" + functions.getValueOfSelectedParameter(camera, functions.ISO) + "\n"
     
@@ -93,10 +100,17 @@ def updateSpeed( btSerial, command ) :
     if (functions.cameraConfiguration[functions.SHUTTER_SPEED].has_key(value)) :
         index = functions.cameraConfiguration[functions.SHUTTER_SPEED][value]
         functions.setPropertyTo(camera, functions.SHUTTER_SPEED, index)
+        photoParameter['BSP'] = -1
     else :
         sendMessage(btSerial, "Unexpected value for speed : " + value + "\n")
     
     functions.releaseCamera(camera)
+    return
+
+def updateSpeedBulb( btSerial, command ) :
+    value = command.split('BSP')[-1]
+    updateSpeed(btSerial, 'SPbulb')
+    photoParameter['BSP'] = value
     return
 
 def updateAperture(btSerial, command) : 
@@ -136,6 +150,8 @@ def dispatch ( btSerial, command ) :
         shoot( btSerial ) 
     elif (command.startswith('SP') ) :
         updateSpeed( btSerial, command )
+    elif (command.startswith('BSP') ) :
+        updateSpeedBulb( btSerial, command )
     elif (command.startswith('AP') ) :
         updateAperture( btSerial, command )
     elif (command.startswith('ISO') ) :

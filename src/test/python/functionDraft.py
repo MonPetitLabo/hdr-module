@@ -123,3 +123,9 @@ def buildSpeedSequence(baseSpeedIndex, nbPicture, evRequire):
 
     return sequence
 
+def takeLongPhoto(camera, duration) :
+    setPropertyTo(camera, "eosremoterelease", 5)
+    time.sleep(duration) 
+    setPropertyTo(camera, "eosremoterelease", 4)
+
+

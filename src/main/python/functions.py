@@ -102,8 +102,13 @@ def takePhotoHdr(camera, nbPicture, evRequire) :
     # reset default configuration 
     setPropertyTo(camera, SHUTTER_SPEED, speed)
 
-def takeLongPhoto(camera) :
+def takeLongPhoto(camera, duration) :
+    setPropertyTo(camera, "eosremoterelease", 5)
+    time.sleep(duration)
+    setPropertyTo(camera, "eosremoterelease", 4)
     return
+
+
 
 def updateConfiguration(camera, speed, aperture, iso):
     setPropertyTo(camera, SHUTTER_SPEED, speed)
